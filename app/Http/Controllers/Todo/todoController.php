@@ -19,18 +19,15 @@ class todoController extends Controller
     public function __construct()
     {
         $this->name = "Todo";
+
         $this->todo = new Todo();
     }
 
     public function index()
     {
-        $todos = DB::table('todos')
-        ->orderBy('id', 'desc')
-        ->get();
 
-        return view("{$this->name}.index" , ['todos' => $todos]);
-        // return view('todos')->with('todos',$todos);
-        // return view('todos' , compact('todos'));
+        return view("{$this->name}.index" , ['todos' => $this->todo->orderBy('id', 'desc')->get()]);
+
     }
 
     public function show($id)
@@ -48,21 +45,21 @@ class todoController extends Controller
         $this->todo->title = $request->input('title');
         $this->todo->description = $request->input('desc');
         $this->todo->save();
+
         session()->flash('msg' , "ceate done");
         return redirect('/todo');
     }
 
     public function edit($id)
     {
-        $todo = $this->todo->find($id);
-        return view("{$this->name}.edit")->with('todo' , $todo);
+        return view("{$this->name}.edit")->with('todo' , $this->todo->find($id));
     }
 
     public function update(updateValidation $request , $id)
     {
 
-        $todo = Todo::find($id);
-        $this->todo = $todo;
+        $this->todo = $this->todo->find($id);
+
         $this->todo->title = $request->input('title');
         $this->todo->description = $request->input('desc');
         $this->todo->save();
@@ -73,16 +70,15 @@ class todoController extends Controller
 
     public function destroy($id)
     {
-        $todo = $this->todo->find($id);
-        $todo->delete();
+        $this->todo->find($id)->delete();
         session()->flash('msg' , "delete done");
         return redirect("/todo");
     }
 
     public function complete($id){
-        $todo = $this->todo->find($id);
-        $todo->completed = true;
-        $todo->save();
+        $this->todo = $this->todo->find($id);
+        $this->todo->completed = true;
+        $this->todo->save();
         session()->flash('msg' , "Todo  completed");
         return redirect("/todo");
     }

@@ -11,7 +11,6 @@
 |
 */
 
-use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,16 +30,14 @@ Route::get('/', function () {
 Route::namespace('Todo')->group(function(){
         Route::resource('/todo', 'todoController');
         Route::get('/todo/complete/{id}' , 'todoController@complete')->name('todo.complete');
+
 });
 
-Route::get('/admin/empty', function(){
+Route::get('/Admin/migrate', function(){
     $exitecode = Artisan::call('migrate:fresh ');
-    return redirect('/todo');
 });
 
-Route::get('/admin/seed', function(){
-    $exitecode = Artisan::call('db:seed');
-    return redirect('/todo');
+Route::get('/Admin/seeds', function(){
+    $exitecode = Artisan::call('migrate:fresh ');
 });
-
 
