@@ -47,7 +47,7 @@ class todoController extends Controller
         $this->todo->save();
 
         session()->flash('msg' , "ceate done");
-        return redirect('/todo');
+        return redirect(route("todo.index"));
     }
 
     public function edit($id)
@@ -64,7 +64,7 @@ class todoController extends Controller
         $this->todo->description = $request->input('desc');
         $this->todo->save();
         session()->flash('msg' , "update succes");
-        return redirect("/todo");;
+        return redirect(route("todo.index"));;
 
     }
 
@@ -72,7 +72,7 @@ class todoController extends Controller
     {
         $this->todo->find($id)->delete();
         session()->flash('msg' , "delete done");
-        return redirect("/todo");
+        return redirect(route("todo.index"));
     }
 
     public function complete($id){
@@ -80,7 +80,7 @@ class todoController extends Controller
         $this->todo->completed = true;
         $this->todo->save();
         session()->flash('msg' , "Todo  completed");
-        return redirect("/todo");
+        return redirect(route("todo.index"));
     }
 
 }
