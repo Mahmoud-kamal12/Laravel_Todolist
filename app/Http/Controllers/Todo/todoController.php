@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Todo\addValidation;
 use App\Http\Requests\Todo\updateValidation;
 use App\Todo\Todo;
+use Error;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Expr\FuncCall;
@@ -57,15 +59,26 @@ class todoController extends Controller
 
     public function update(updateValidation $request , $id)
     {
-
         $this->todo = $this->todo->find($id);
-
-        $this->todo->title = $request->input('title');
-        $this->todo->description = $request->input('desc');
-        $this->todo->save();
-        session()->flash('msg' , "update succes");
-        return redirect(route("todo.index"));;
-
+        $id = $this->todo->id;
+        $data["description"] = $request->input('desc');
+        if($this->todo->title != $request->input('title')){
+            $data['title'] =  $request->input('title');
+            try{
+                Todo::where('id', $id)->update($data);
+                session()->flash('msg' , 'update secces');
+                return redirect(route("todo.index"));
+            }catch(QueryException $e){
+                $errorCode = $e->errorInfo[1];
+                if($errorCode == '1062')
+                    return redirect()->back()->withErrors(['title' => 'The title has already been taken.']);
+            }
+        }
+        else{
+            Todo::where('id', $id)->update($data);
+            session()->flash('msg' , 'update secces');
+            return redirect(route("todo.index"));
+        }
     }
 
     public function destroy($id)
