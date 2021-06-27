@@ -15,7 +15,8 @@ use PhpParser\Node\Expr\FuncCall;
 
 class todoController extends Controller
 {
-    private $todo ;
+    private $todo;
+    
     private $name;
 
     public function __construct()
@@ -34,6 +35,13 @@ class todoController extends Controller
 
     public function show($id)
     {
+        if($this->todo->find($id) == null){
+            $notification = array(
+                'message' => 'not found',
+                'alert-type' => 'error'
+            );
+            return redirect(route("todo.index"))->with($notification);
+        }
         return view("{$this->name}.show" , ['todo' => $this->todo->find($id)]);
     }
 
@@ -48,52 +56,60 @@ class todoController extends Controller
         $this->todo->description = $request->input('desc');
         $this->todo->save();
 
-        session()->flash('msg' , "ceate done");
-        return redirect(route("todo.index"));
+        $notification = array(
+            'message' => 'todo created success',
+            'alert-type' => 'success'
+        );
+        return redirect(route("todo.index"))->with($notification);
     }
 
     public function edit($id)
     {
-        return view("{$this->name}.edit")->with('todo' , $this->todo->find($id));
+        if($this->todo->find($id) == null){
+            $notification = array(
+                'message' => 'not found',
+                'alert-type' => 'error'
+            );
+            return redirect(route("todo.index"))->with($notification);
+        }
+        return view("{$this->name}.edit")->with('todo' , $this->todo->find($id));        
     }
 
     public function update(updateValidation $request , $id)
     {
+
         $this->todo = $this->todo->find($id);
-        $id = $this->todo->id;
-        $data["description"] = $request->input('desc');
-        if($this->todo->title != $request->input('title')){
-            $data['title'] =  $request->input('title');
-            try{
-                Todo::where('id', $id)->update($data);
-                session()->flash('msg' , 'update secces');
-                return redirect(route("todo.index"));
-            }catch(QueryException $e){
-                $errorCode = $e->errorInfo[1];
-                if($errorCode == '1062')
-                    return redirect()->back()->withErrors(['title' => 'The title has already been taken.']);
-            }
-        }
-        else{
-            Todo::where('id', $id)->update($data);
-            session()->flash('msg' , 'update secces');
-            return redirect(route("todo.index"));
-        }
+        $this->todo->title = $request->input('title');
+        $this->todo->description = $request->input('desc');
+        $this->todo->save();
+        $notification = array(
+            'message' => 'update success',
+            'alert-type' => 'success'
+        );
+        return redirect(route("todo.index"))->with($notification);    
+
     }
 
     public function destroy($id)
     {
         $this->todo->find($id)->delete();
-        session()->flash('msg' , "delete done");
-        return redirect(route("todo.index"));
+        $notification = array(
+            'message' => 'delete success',
+            'alert-type' => 'success'
+        );
+        return redirect(route("todo.index"))->with($notification);
     }
 
     public function complete($id){
         $this->todo = $this->todo->find($id);
         $this->todo->completed = true;
         $this->todo->save();
-        session()->flash('msg' , "Todo  completed");
-        return redirect(route("todo.index"));
+        $notification = array(
+            'message' => 'Todo  completedlete success',
+            'alert-type' => 'success'
+        );
+        
+        return redirect(route("todo.index"))->with($notification);
     }
 
 }
